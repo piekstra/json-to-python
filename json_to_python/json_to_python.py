@@ -25,8 +25,6 @@ class JsonToPython:
             elif type(val) is str:
                 pyclass.add_line(PyLine(f"self.{class_property_name}: str = {data_dict_name}.get('{key}')", 2))
             elif type(val) is list:
-                # TODO
-                # Non-empty list
                 if val:
                     if type(val[0]) is int:
                         pyclass.add_line(PyLine(f"self.{class_property_name}: list[int] = {data_dict_name}.get('{key}')", 2))
