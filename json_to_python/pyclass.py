@@ -13,8 +13,8 @@ class PyClass:
         self.import_decimal: bool = False
         self.class_name = ''.join([component.capitalize() for component in name.split('_')])
 
-    def add_line(self, line: PyLine):
-        self._lines.append(line)
+    def add_line(self, line: str, indent_level: int):
+        self._lines.append(PyLine(line, indent_level))
 
     def get_lines(self):
         return self._lines
