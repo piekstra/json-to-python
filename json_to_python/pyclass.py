@@ -1,3 +1,6 @@
+from .naming import Naming
+
+
 class PyLine:
     def __init__(self, line: str, indent_level: int):
         indent = '    ' * indent_level
@@ -11,7 +14,8 @@ class PyClass:
     def __init__(self, name: str):
         self._lines: list[PyLine] = []
         self.import_decimal: bool = False
-        self.class_name = ''.join([component.capitalize() for component in name.split('_')])
+        self.snake_case_name = Naming.camel_to_snake(name)
+        self.class_name = ''.join([component.capitalize() for component in self.snake_case_name.split('_')])
 
     def add_line(self, line: str, indent_level: int):
         self._lines.append(PyLine(line, indent_level))

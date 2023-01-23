@@ -9,7 +9,7 @@ class JsonToPython:
     def dict_to_class(data: dict, name: str, classes: PyClassList) -> PyClassList:
         pyclass = PyClass(name)
         pyclass.add_line(f'class {pyclass.class_name}:', 0)
-        data_dict_name = f'{name}_data'
+        data_dict_name = f'{pyclass.snake_case_name}_data'
         pyclass.add_line(f'def __init__(self, {data_dict_name}: dict):', 1)
         for key, val in data.items():
             class_property_name = Naming.camel_to_snake(key)
@@ -22,12 +22,16 @@ class JsonToPython:
                         f"self.{class_property_name}: Optional[Decimal] = Decimal(str({class_property_name})) if {class_property_name} is not None else None",
                         2
                 )
+            elif type(val) is bool:
+                pyclass.add_line(f"self.{class_property_name}: bool = {data_dict_name}.get('{key}')", 2)
             elif type(val) is str:
                 pyclass.add_line(f"self.{class_property_name}: str = {data_dict_name}.get('{key}')", 2)
             elif type(val) is list:
                 if val:
                     if type(val[0]) is int:
                         pyclass.add_line(f"self.{class_property_name}: list[int] = {data_dict_name}.get('{key}')", 2)
+                    if type(val) is bool:
+                        pyclass.add_line(f"self.{class_property_name}: list[bool] = {data_dict_name}.get('{key}')", 2)
                     if type(val[0]) is str:
                         pyclass.add_line(f"self.{class_property_name}: list[str] = {data_dict_name}.get('{key}')", 2)
                     if type(val[0]) is float:
@@ -36,8 +40,13 @@ class JsonToPython:
                     if type(val[0]) is dict:
                         last_class = JsonToPython.dict_to_class(val[0], key, classes).get_last_class()
                         pyclass.add_line(f"self.{class_property_name}: list[{last_class.class_name}] = [{last_class.class_name}(item) for item in {data_dict_name}.get('{key}')]", 2)
+                else:
+                    pyclass.add_line(f"self.{class_property_name}: list = {data_dict_name}.get('{key}')", 2)
             elif type(val) is dict:
-                JsonToPython.dict_to_class(val, key, classes)
+                last_class = JsonToPython.dict_to_class(val, key, classes).get_last_class()
+                sub_class_data_name = f'{class_property_name}_data'
+                pyclass.add_line(f"{sub_class_data_name}: dict = {data_dict_name}.get('{key}')", 2)
+                pyclass.add_line(f"self.{class_property_name}: {last_class.class_name} = {last_class.class_name}({sub_class_data_name}) if {sub_class_data_name} is not None else None", 2)
 
         pyclass.add_line('', 0)
         pyclass.add_line('', 0)
