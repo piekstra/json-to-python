@@ -13,6 +13,8 @@ class JsonToPython:
         pyclass.add_line(f'def __init__(self, {data_dict_name}: dict):', 1)
         for key, val in data.items():
             class_property_name = Naming.camel_to_snake(key)
+            # Can't have dashes
+            class_property_name = class_property_name.replace('-', '_')
             if type(val) is int:
                 pyclass.add_line(f"self.{class_property_name}: int = {data_dict_name}.get('{key}')", 2)
             elif type(val) is float:
